@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
+
 const CustomVideo = (props: any) => {
   const videoNode = useRef(null);
   const [player, setPlayer] = useState(null);
@@ -25,6 +26,7 @@ const CustomVideo = (props: any) => {
     }
   }, [props.sources]);
 
+
   return (
     <div style={{ height: "80vh", width: "80vw" }} data-vjs-player>
       <video ref={videoNode} className="video-js"></video>
@@ -47,11 +49,28 @@ export default function Video() {
     fluid: true,
     autoplay: false,
     controls: true,
-    preload: "metadata",
+    preload: "auto",
+    playbackRates: [0.5, 1, 1.5, 2, 2.5],
+    userActions: {
+      hotkeys: true,
+    },
+    crossorigin:"anonymous",
+    controlBar: {
+      pictureInPictureToggle: false,
+    },
     sources: [
       {
         src: stateFinalLink || "",
         type: "application/x-mpegURL",
+      },
+    ],
+    tracks: [
+      {
+        default:true,   
+        kind: "captions",
+        srclang: "vi",
+        label: "Tieng Viet",
+        src: "https://cors-anywhere.herokuapp.com/https://phimnhua.net/wp-content/uploads/2021/07/Kung.Fu_.Panda_.2008.720p.BrRip_.x264.vtt",
       },
     ],
   };
@@ -72,7 +91,7 @@ export default function Video() {
           <button
             onClick={() =>
               setStateFinalink(
-                "https://vn01.quaivat.com/the_medium_2021/tm_2021.m3u8"
+                "https://vn04.quaivat.com/kung_fu_panda_2008/kfp_2008.m3u8"
               )
             }
           >
