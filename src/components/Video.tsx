@@ -1,10 +1,17 @@
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Collapse from "@mui/material/Collapse";
 import { useEffect, useRef, useState } from "react";
 import videojs from "video.js";
+import Player from "video.js/dist/types/player";
 import "video.js/dist/video-js.css";
+import { videoData } from "./videoData";
+import { ListSubheader, TextField } from "@mui/material";
 
 const CustomVideo = (props: any) => {
   const videoNode = useRef(null);
-  const [player, setPlayer] = useState(null);
+  const [player, setPlayer] = useState<Player | null>(null);
   useEffect(() => {
     if (videoNode.current) {
       const _player = videojs(videoNode.current, props);
@@ -15,7 +22,7 @@ const CustomVideo = (props: any) => {
         }
       };
     }
-  }, []);
+  }, [props.key]);
 
   useEffect(() => {
     if (player && props.sources[0].src !== "") {
@@ -24,8 +31,7 @@ const CustomVideo = (props: any) => {
       player.load();
       player.play();
     }
-  }, [props.sources]);
-
+  }, [props]);
 
   return (
     <div style={{ height: "80vh", width: "80vw" }} data-vjs-player>
@@ -34,17 +40,92 @@ const CustomVideo = (props: any) => {
   );
 };
 export default function Video() {
-  const [message, setMessage] = useState<string | null>("");
+  const [finalVttLink, setFinalVttLink] = useState<string | null>("");
   const [stateFinalLink, setStateFinalink] = useState<string | null>(null);
+  const [key, setKey] = useState<number>(0);
 
-  const handleChange = (event: any) => {
-    setMessage(event.target.value);
-  };
+  const prevMessageRef = useRef<any>(null);
+  const prevVttLinkRef = useRef<any>(null);
 
   const handleClick2 = () => {
-    setStateFinalink(message);
+    setStateFinalink(prevMessageRef?.current?.value);
+    setFinalVttLink(prevVttLinkRef?.current?.value);
+    setKey((prevKey) => prevKey + 1);
+  };
+
+  const CustomLits = () => {
+    const [open, setOpen] = useState(false);
+    const [listLink, setListLink] = useState([]);
+
+    useEffect(() => {
+      getListLink();
+    }, []);
+
+    const getListLink = async () => {
+      const response = await fetch(
+        "https://cors-anywhere.herokuapp.com/" + import.meta.env.VITE_LIST_LINK,
+        {
+          method: "GET",
+          headers: {
+            Origin: "null",
+          },
+          mode: "cors",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const res = await response.json();
+      setListLink(res);
+    };
+
+    const handleClick = () => {
+      setOpen(!open);
+    };
+    return (
+      <List
+        sx={{
+          width: "100%",
+          bgcolor: "background.paper",
+          position: "relative",
+          overflow: "auto",
+          maxHeight: 300,
+          "& ul": { padding: 0 },
+        }}
+        subheader={<li />}
+        component="nav"
+        aria-labelledby="nested-list-subheader"
+      >
+        <ListSubheader
+          style={{ cursor: "pointer" }}
+          onClick={handleClick}
+        >{`Phim load sẵn`}</ListSubheader>
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {listLink.length > 0 &&
+              listLink.map((item: any) => {
+                return (
+                  <ListItemButton
+                    onClick={() => {
+                      setFinalVttLink(item.vtt);
+                      setStateFinalink(item.link);
+                      setKey((prevKey) => prevKey + 1);
+                    }}
+                    key={item.link}
+                    sx={{ pl: 4 }}
+                  >
+                    <ListItemText primary={item.phim} />
+                  </ListItemButton>
+                );
+              })}
+          </List>
+        </Collapse>
+      </List>
+    );
   };
   const play = {
+    key,
     fill: true,
     fluid: true,
     autoplay: false,
@@ -54,7 +135,7 @@ export default function Video() {
     userActions: {
       hotkeys: true,
     },
-    crossorigin:"anonymous",
+    crossorigin: "anonymous",
     controlBar: {
       pictureInPictureToggle: false,
     },
@@ -66,38 +147,62 @@ export default function Video() {
     ],
     tracks: [
       {
-        default:true,   
+        default: true,
         kind: "captions",
         srclang: "vi",
         label: "Tieng Viet",
-        src: "https://cors-anywhere.herokuapp.com/https://phimnhua.net/wp-content/uploads/2021/07/Kung.Fu_.Panda_.2008.720p.BrRip_.x264.vtt",
+        src: `https://cors-anywhere.herokuapp.com/${finalVttLink}`,
       },
     ],
   };
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <div>
-          <input
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+          width: "100%",
+        }}
+      >
+        <span>
+          nếu có lỗi sub,vui lòng vào link sau vào lấy quyền{" "}
+          <a
+            href="https://cors-anywhere.herokuapp.com/corsdemo"
+            target="_blank"
+          >
+            lấy quyền
+          </a>
+        </span>
+        <div
+          style={{
+            display: "flex",
+            gap: "20px",
+            width: "100%",
+            justifyContent: "space-around",
+          }}
+        >
+          <TextField
+            style={{ maxWidth: "100%", display: "flex" }}
+            label="Link Phim"
+            variant="outlined"
             type="text"
             id="message"
             name="message"
-            onChange={handleChange}
-            value={message || ""}
+            ref={prevMessageRef}
+          />
+          <TextField
+            style={{ maxWidth: "100%", display: "flex" }}
+            label="Link Sub"
+            variant="outlined"
+            type="text"
+            id="vttLink"
+            name="vttLink"
+            ref={prevVttLinkRef}
           />
           <button onClick={handleClick2}>Watch</button>
         </div>
-        <div>
-          <button
-            onClick={() =>
-              setStateFinalink(
-                "https://vn04.quaivat.com/kung_fu_panda_2008/kfp_2008.m3u8"
-              )
-            }
-          >
-            Bà Đồng (2021) | The Medium
-          </button>
-        </div>
+        <CustomLits></CustomLits>
       </div>
       <div className="App">{stateFinalLink && <CustomVideo {...play} />}</div>
     </>
