@@ -46,6 +46,26 @@ export default function Video() {
   const prevMessageRef = useRef<any>(null);
   const prevVttLinkRef = useRef<any>(null);
 
+  // const getVttLinkAxios = async (url: string) => {
+  //   try {
+  //     const response = await axios.get(url, {
+  //       headers: {
+  //         "Access-Control-Allow-Origin": "*",
+  //         "Access-Control-Allow-Methods":
+  //           "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+  //         "Access-Control-Allow-Headers":
+  //           "X-Requested-With, content-type, Authorization",
+  //       },
+  //     });
+
+  //     console.log(response.data);
+
+  //     return "  ";
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
+
   const handleClick2 = () => {
     setStateFinalink(prevMessageRef?.current?.value);
     setFinalVttLink(prevVttLinkRef?.current?.value);
@@ -61,16 +81,13 @@ export default function Video() {
     }, []);
 
     const getListLink = async () => {
-      const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/" + import.meta.env.VITE_LIST_LINK,
-        {
-          method: "GET",
-          headers: {
-            Origin: "null",
-          },
-          mode: "cors",
-        }
-      );
+      const response = await fetch(import.meta.env.VITE_LIST_LINK, {
+        method: "GET",
+        headers: {
+          Origin: "null",
+        },
+        mode: "cors",
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -150,7 +167,8 @@ export default function Video() {
         kind: "captions",
         srclang: "vi",
         label: "Tieng Viet",
-        src: `https://cors-anywhere.herokuapp.com/${finalVttLink}`,
+        src: `https://thingproxy.freeboard.io/fetch/${finalVttLink}`,
+        // src: getVttLinkAxios(finalVttLink),
       },
     ],
   };
@@ -164,7 +182,7 @@ export default function Video() {
           width: "100%",
         }}
       >
-        <span>
+        {/* <span>
           nếu có lỗi sub,vui lòng vào link sau vào lấy quyền{" "}
           <a
             href="https://cors-anywhere.herokuapp.com/corsdemo"
@@ -172,7 +190,7 @@ export default function Video() {
           >
             lấy quyền
           </a>
-        </span>
+        </span> */}
         <div
           style={{
             display: "flex",
